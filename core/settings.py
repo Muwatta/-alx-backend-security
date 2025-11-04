@@ -70,6 +70,17 @@ TEMPLATES = [
     },
 ]
 
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "geo_cache"
+    }
+}
+
+WHITELISTED_IPS = ["127.0.0.1", "localhost", "192.168.0.105", "10.0.0.5"]
+
+
+
 WSGI_APPLICATION = 'core.wsgi.application'
 
 
