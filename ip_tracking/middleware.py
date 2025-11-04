@@ -1,20 +1,20 @@
-from .models import RequestLog
-from django.utils.timezone import now
 from django.utils.deprecation import MiddlewareMixin
+from django.http import HttpResponseForbidden
+from .models import RequestLog, BlockedIP
+from django.utils import timezone
 
-class IPLoggingMiddleware(MiddlewareMixin):
-    def get_client_ip(self, request):
-        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-        if x_forwarded_for:
-            return x_forwarded_for.split(',')[0]
-        return request.META.get('REMOTE_ADDR')
 
+class IPTrackingMiddleware(MiddlewareMixin):
     def process_request(self, request):
-        ip = self.get_client_ip(request)
-        path = request.path
+        ip = request.META.get("REMOTE_ADDR")
 
+        # Block if IP is blacklisted
+        if BlockedIP.objects.filter(ip_address=ip).exists():
+            return HttpResponseForbidden("Forbidden: Your IP has been blocked.")
+
+        # Log request
         RequestLog.objects.create(
             ip_address=ip,
-            path=path,
-            timestamp=now()
+            timestamp=timezone.now(),
+            path=request.path,
         )
