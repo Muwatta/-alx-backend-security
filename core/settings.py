@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'ip_tracking',
+    'django_ratelimit',
 ]
 
 MIDDLEWARE = [
@@ -70,15 +71,10 @@ TEMPLATES = [
     },
 ]
 
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-        "LOCATION": "geo_cache"
-    }
-}
 
 WHITELISTED_IPS = ["127.0.0.1", "localhost", "192.168.0.105", "10.0.0.5"]
 
+RATELIMIT_USE_CACHE = 'default'   # Uses default cache backend
 
 
 WSGI_APPLICATION = 'core.wsgi.application'
@@ -135,3 +131,20 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+
+
+# --- Django Ratelimit development setup ---
+# Use in-memory cache (fine for local testing)
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
+
+# Ignore system check for ratelimit warnings
+SILENCED_SYSTEM_CHECKS = ['django_ratelimit.W001', 'django_ratelimit.E003']
+
